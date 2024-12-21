@@ -1,3 +1,5 @@
+package type.tasks;
+
 import java.util.ArrayList;
 
 public class EpicTask extends Task {
@@ -5,12 +7,14 @@ public class EpicTask extends Task {
     protected ArrayList <Integer> subTasksIds = new ArrayList<>();
 
 
-    public EpicTask (int id, String name, String taskDescription, TaskStatus status) {
-        super(id, name, taskDescription, status);
+    public EpicTask (int id, String name, String taskDescription) {
+        super(id, name, taskDescription);
+        status = TaskStatus.NEW;
     }
 
-    public EpicTask (String name, String taskDescription, TaskStatus status) {
-        super(name, taskDescription, status);
+    public EpicTask (String name, String taskDescription) {
+        super(name, taskDescription);
+        status = TaskStatus.NEW;
     }
 
     public void addSubtaskId (int id) {
@@ -27,5 +31,9 @@ public class EpicTask extends Task {
 
     public void deleteSubTask(int id) {
         subTasksIds.remove(id);
+    }
+
+    public void setSubTasksIds(ArrayList<Integer> subTasksIds) {
+        this.subTasksIds = subTasksIds;
     }
 }

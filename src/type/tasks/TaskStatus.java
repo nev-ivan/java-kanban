@@ -1,3 +1,5 @@
+package type.tasks;
+
 public enum TaskStatus {
     NEW,
     IN_PROGRESS,
