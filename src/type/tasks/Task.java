@@ -9,16 +9,15 @@ public class Task {
     protected int id;
     protected TaskStatus status;
 
-    public Task (int id, String name, String taskDescription) {
-        this(name, taskDescription);
+    public Task(int id, String name, String taskDescription) {
         this.id = id;
-        status = TaskStatus.NEW;
-    }
-
-    public Task (String name, String taskDescription) {
         this.name = name;
         this.taskDescription = taskDescription;
         status = TaskStatus.NEW;
+    }
+
+    public Task(String name, String taskDescription) {
+        this(0, name, taskDescription);
     }
 
     public String getName() {
@@ -54,17 +53,15 @@ public class Task {
     }
 
     @Override
-    public boolean equals (Object o){
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
         return Objects.equals(id, task.id);
     }
 
-
-
     @Override
-    public String toString () {
+    public String toString() {
         return "name=" + name + ", taskDescription=" + taskDescription + ", status=" + status;
     }
 

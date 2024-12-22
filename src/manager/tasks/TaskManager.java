@@ -1,6 +1,7 @@
 package manager.tasks;
 
 import type.tasks.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,28 +10,19 @@ import java.util.Set;
 public class TaskManager {
 
     protected int countId = 0;
-
     protected HashMap<Integer, Task> taskMap = new HashMap<>();
-
     protected HashMap<Integer, EpicTask> epicMap = new HashMap<>();
     protected HashMap<Integer, SubTask> subTaskMap = new HashMap<>();
-    public int getCountId() {
-        return countId;
-    }
-
-    public void setCountId(int countId) {
-        this.countId = countId;
-    }
 
     public ArrayList<Task> getTasks() {
         return new ArrayList<Task>(taskMap.values());
     }
 
-    public ArrayList <SubTask> getSubTasks() {
+    public ArrayList<SubTask> getSubTasks() {
         return new ArrayList<SubTask>(subTaskMap.values());
     }
 
-    public ArrayList <EpicTask> getEpicTasks() {
+    public ArrayList<EpicTask> getEpicTasks() {
         return new ArrayList<EpicTask>(epicMap.values());
     }
 
@@ -53,26 +45,26 @@ public class TaskManager {
         subTaskMap.clear();
     }
 
-    public Task getTask (int id) {
-       return taskMap.get(id);
+    public Task getTask(int id) {
+        return taskMap.get(id);
     }
 
-    public SubTask getSubTask (int id) {
+    public SubTask getSubTask(int id) {
         return subTaskMap.get(id);
     }
 
-    public EpicTask getEpicTask (int id) {
+    public EpicTask getEpicTask(int id) {
         return epicMap.get(id);
     }
 
-    public int addNewTask (Task task) {
+    public int addNewTask(Task task) {
         int id = ++countId;
         task.setId(id);
         taskMap.put(id, task);
         return id;
     }
 
-    public int addNewSubTask (SubTask subTask) {
+    public int addNewSubTask(SubTask subTask) {
 
         if (!epicMap.containsKey(subTask.getIdOfEpic())) {
             System.out.println("There is no such epic");
@@ -89,7 +81,7 @@ public class TaskManager {
         return id;
     }
 
-    public int addNewEpic (EpicTask epicTask) {
+    public int addNewEpic(EpicTask epicTask) {
         int id = ++countId;
         epicTask.setId(id);
         epicMap.put(id, epicTask);
@@ -97,7 +89,7 @@ public class TaskManager {
         return id;
     }
 
-    public void updateTask (Task task) {
+    public void updateTask(Task task) {
         if (taskMap.containsValue(task)) {
             taskMap.put(task.getId(), task);
         } else {
@@ -105,15 +97,16 @@ public class TaskManager {
         }
     }
 
-    public void updateSubTask (SubTask subTask) {
+    public void updateSubTask(SubTask subTask) {
         if (subTaskMap.containsValue(subTask)) {
             subTaskMap.put(subTask.getId(), subTask);
+            updateEpicStatus(epicMap.get(subTask.getIdOfEpic()));
         } else {
             System.out.println("There is no such subTask");
         }
     }
 
-    public void updateEpic (EpicTask epicTask) {
+    public void updateEpic(EpicTask epicTask) {
         if (epicMap.containsValue(epicTask)) {
             epicMap.put(epicTask.getId(), epicTask);
             updateEpicStatus(epicTask);
@@ -155,44 +148,19 @@ public class TaskManager {
         return subTasksOfEpic;
     }
 
-    private void updateEpicStatus (EpicTask epicTask){
+    private void updateEpicStatus(EpicTask epicTask) {
         ArrayList<Integer> subTasksId = epicTask.getSubTasksIds();
         Set<TaskStatus> allStatusOfEpic = new HashSet<>();
-        for (int id : subTasksId){
-           SubTask subTask = subTaskMap.get(id);
-           allStatusOfEpic.add(subTask.getStatus());
+        for (int id : subTasksId) {
+            SubTask subTask = subTaskMap.get(id);
+            allStatusOfEpic.add(subTask.getStatus());
         }
-        if (allStatusOfEpic.isEmpty()||(allStatusOfEpic.contains(TaskStatus.NEW) && allStatusOfEpic.size()==1)) {
+        if (allStatusOfEpic.isEmpty() || (allStatusOfEpic.contains(TaskStatus.NEW) && allStatusOfEpic.size() == 1)) {
             epicTask.setStatus(TaskStatus.NEW);
         } else if (allStatusOfEpic.contains(TaskStatus.DONE) && (allStatusOfEpic.size() == 1)) {
             epicTask.setStatus(TaskStatus.DONE);
         } else {
             epicTask.setStatus(TaskStatus.IN_PROGRESS);
         }
-    }
-
-
-    public HashMap<Integer, Task> getTaskMap() {
-        return taskMap;
-    }
-
-    public void setTaskMap(HashMap<Integer, Task> taskMap) {
-        this.taskMap = taskMap;
-    }
-
-    public HashMap<Integer, EpicTask> getEpicMap() {
-        return epicMap;
-    }
-
-    public void setEpicMap(HashMap<Integer, EpicTask> epicMap) {
-        this.epicMap = epicMap;
-    }
-
-    public HashMap<Integer, SubTask> getSubTaskMap() {
-        return subTaskMap;
-    }
-
-    public void setSubTaskMap(HashMap<Integer, SubTask> subTaskMap) {
-        this.subTaskMap = subTaskMap;
     }
 }
