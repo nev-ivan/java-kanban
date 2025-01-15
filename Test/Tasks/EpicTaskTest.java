@@ -11,9 +11,4 @@ class EpicTaskTest {
         EpicTask epic2 = new EpicTask(1,"epic2", "newEpic2");
         assertEquals(epic1, epic2, "Программа работает некорректно");
     }
-
-    @Test
-    void deleteSubtaskIdsFromEpic() {
-
-    }
 }
