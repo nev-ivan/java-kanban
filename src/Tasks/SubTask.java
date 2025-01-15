@@ -1,4 +1,4 @@
-package type.tasks;
+package Tasks;
 
 public class SubTask extends Task {
 
@@ -20,4 +20,3 @@ public class SubTask extends Task {
     }
 
 }
-

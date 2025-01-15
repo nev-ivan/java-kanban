@@ -1,13 +1,13 @@
-import manager.tasks.TaskManager;
-import type.tasks.EpicTask;
-import type.tasks.SubTask;
-import type.tasks.Task;
+import Managers.*;
+import Tasks.*;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        TaskManager manager = new TaskManager();
+       /* TaskManager manager = Managers.getDefault();
+        HistoryManager historyManager = new InMemoryHistoryManager();
+
 
         Task task1 = new Task("Завтрак", "Готовим на завтрак яичницу");
         Task task2 = new Task("Занятия спортом", "Отжимаемся от пола 50 раз");
@@ -26,15 +26,18 @@ public class Main {
         manager.addNewSubTask(subTask2);
         manager.addNewSubTask(subTask3);
 
-        System.out.println(manager.getTaskMap());
-        System.out.println(manager.getEpicMap());
-        System.out.println(manager.getSubTaskMap());
+        System.out.println(manager.getTasks());
+        System.out.println(manager.getEpicTasks());
+        System.out.println(manager.getSubTasks());
 
         manager.deleteSubTask(subTask3.getId());
         manager.deleteTask(task1.getId());
 
-        System.out.println(manager.getTaskMap());
-        System.out.println(manager.getEpicMap());
-        System.out.println(manager.getSubTaskMap());
+        System.out.println(manager.getTasks());
+        System.out.println(manager.getEpicTasks());
+        System.out.println(manager.getSubTasks());
+
+        System.out.println(historyManager.getHistory());*/
+
     }
 }

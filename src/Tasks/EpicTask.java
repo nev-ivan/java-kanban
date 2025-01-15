@@ -1,4 +1,4 @@
-package type.tasks;
+package Tasks;
 
 import java.util.ArrayList;
 
@@ -28,7 +28,7 @@ public class EpicTask extends Task {
     }
 
     public void deleteSubTask(int id) {
-        subTasksIds.remove(id);
+        subTasksIds.remove(Integer.valueOf(id));
     }
 
     public void setSubTasksIds(ArrayList<Integer> subTasksIds) {
