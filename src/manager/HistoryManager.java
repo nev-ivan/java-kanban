@@ -1,12 +1,12 @@
-package Managers;
+package manager;
 
-import Tasks.Task;
+import task.Task;
 
 import java.util.List;
 
 public interface HistoryManager {
 
-    void addTaskInHistory(Task task);
+    <T extends Task> T addTaskInHistory(T task);
 
     List<Task> getHistory();
 }

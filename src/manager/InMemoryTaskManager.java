@@ -1,6 +1,7 @@
-package Managers;
+package manager;
 
-import Tasks.*;
+import task.*;
+
 import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -9,21 +10,21 @@ public class InMemoryTaskManager implements TaskManager {
     protected HashMap<Integer, Task> taskMap = new HashMap<>();
     protected HashMap<Integer, EpicTask> epicMap = new HashMap<>();
     protected HashMap<Integer, SubTask> subTaskMap = new HashMap<>();
-    HistoryManager historyManager = new InMemoryHistoryManager();
+    protected HistoryManager historyManager = Managers.getDefaultHistoryManager();
 
     @Override
     public ArrayList<Task> getTasks() {
-        return new ArrayList<Task>(taskMap.values());
+        return new ArrayList<>(taskMap.values());
     }
 
     @Override
     public ArrayList<SubTask> getSubTasks() {
-        return new ArrayList<SubTask>(subTaskMap.values());
+        return new ArrayList<>(subTaskMap.values());
     }
 
     @Override
     public ArrayList<EpicTask> getEpicTasks() {
-        return new ArrayList<EpicTask>(epicMap.values());
+        return new ArrayList<>(epicMap.values());
     }
 
     @Override
@@ -50,20 +51,17 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTask(int id) {
-        historyManager.addTaskInHistory(taskMap.get(id));
-        return taskMap.get(id);
+        return historyManager.addTaskInHistory(taskMap.get(id));
     }
 
     @Override
     public SubTask getSubTask(int id) {
-        historyManager.addTaskInHistory(subTaskMap.get(id));
-        return subTaskMap.get(id);
+        return historyManager.addTaskInHistory(subTaskMap.get(id));
     }
 
     @Override
     public EpicTask getEpicTask(int id) {
-        historyManager.addTaskInHistory(epicMap.get(id));
-        return epicMap.get(id);
+        return historyManager.addTaskInHistory(epicMap.get(id));
     }
 
     @Override
