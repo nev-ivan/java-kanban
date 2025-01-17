@@ -31,8 +31,8 @@ public class InMemoryTaskManagerTest {
     @Test
     void addSubtaskInSubtask() {
         SubTask subTask2 = new SubTask("subTask2", "testSubTask2", subTask.getId());
-        int subTask2Id = taskManager.addNewSubTask(subTask2);
-        assertTrue(subTask2Id < 0);
+        taskManager.addNewSubTask(subTask2);
+        assertNull(taskManager.getEpicTask(subTask.getId()));
     }
 
     @Test
@@ -113,5 +113,17 @@ public class InMemoryTaskManagerTest {
         taskManager.deleteAllEpic();
         assertTrue(taskManager.getSubTasks().isEmpty());
         assertTrue(taskManager.getEpicTasks().isEmpty());
+    }
+
+    @Test
+    void getSubTasksOfEpic() {
+        assertNotNull(taskManager.subTasksOfEpic(epicTask.getId()));
+    }
+
+    @Test
+    void getHistoryOfTaskManagerTest() {
+        taskManager.getTask(task.getId());
+        taskManager.getSubTask(subTask.getId());
+        assertNotNull(taskManager.getHistory());
     }
 }

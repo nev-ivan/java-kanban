@@ -10,14 +10,13 @@ public class InMemoryHistoryManager implements HistoryManager {
     protected List<Task> historyView = new ArrayList<>();
     private final static int MAX_SIZE = 10;
 
-
     @Override
-    public <T extends Task> T addTaskInHistory(T task) {
+    public void addTaskInHistory(Task task) {
         if (historyView.size() >= MAX_SIZE) {
-            historyView.remove(0);
+            historyView.removeFirst();
         }
         historyView.add(task);
-        return task;
+
     }
 
     @Override
