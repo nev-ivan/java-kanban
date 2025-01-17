@@ -117,13 +117,13 @@ public class InMemoryTaskManagerTest {
 
     @Test
     void getSubTasksOfEpic() {
-        assertNotNull(taskManager.subTasksOfEpic(epicTask.getId()));
+        assertEquals(1, taskManager.subTasksOfEpic(epicTask.getId()).size());
     }
 
     @Test
     void getHistoryOfTaskManagerTest() {
         taskManager.getTask(task.getId());
         taskManager.getSubTask(subTask.getId());
-        assertNotNull(taskManager.getHistory());
+        assertEquals(3, taskManager.getHistory().size());
     }
 }

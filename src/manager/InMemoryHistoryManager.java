@@ -16,7 +16,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             historyView.removeFirst();
         }
         historyView.add(task);
-
     }
 
     @Override
