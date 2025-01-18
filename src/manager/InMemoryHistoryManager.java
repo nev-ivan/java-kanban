@@ -15,6 +15,9 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (historyView.size() >= MAX_SIZE) {
             historyView.removeFirst();
         }
+        if (task == null){
+            return;
+        }
         historyView.add(task);
     }
 

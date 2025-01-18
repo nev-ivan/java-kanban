@@ -124,6 +124,6 @@ public class InMemoryTaskManagerTest {
     void getHistoryOfTaskManagerTest() {
         taskManager.getTask(task.getId());
         taskManager.getSubTask(subTask.getId());
-        assertEquals(3, taskManager.getHistory().size());
+        assertEquals(2, taskManager.getHistory().size());
     }
 }
