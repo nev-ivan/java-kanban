@@ -133,7 +133,7 @@ public class InMemoryTaskManagerTest {
     void deleteSubtaskFromEpic() {
         int subId = subTask.getId();
         taskManager.deleteSubTask(subId);
-       ArrayList<Integer> subIds = epicTask.getSubTasksIds();
-       assertFalse(subIds.contains(subId), "Ошибка, id все еще внутри");
+        ArrayList<Integer> subIds = epicTask.getSubTasksIds();
+        assertFalse(subIds.contains(subId), "Ошибка, id все еще внутри");
     }
 }
