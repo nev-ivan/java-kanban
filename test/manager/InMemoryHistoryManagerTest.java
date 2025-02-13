@@ -4,6 +4,8 @@ import task.Task;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryHistoryManagerTest {
@@ -37,12 +39,8 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(task2);
         historyManager.add(task3);
         assertEquals(3, historyManager.getHistory().size(), "некорректное значение");
-        int idOfTask2 = historyManager.getHistory().get(1).getId();
-        int idOfTask3 = historyManager.getHistory().get(2).getId();
         historyManager.remove(task1.getId());
-        assertEquals(2, historyManager.getHistory().size(), "некорректное значение");
-        assertEquals(idOfTask2, historyManager.getHistory().get(0).getId());
-        assertEquals(idOfTask3, historyManager.getHistory().get(1).getId());
+        assertEquals(List.of(task2, task3), historyManager.getHistory());
     }
 
     @Test
@@ -51,12 +49,8 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(task2);
         historyManager.add(task3);
         assertEquals(3, historyManager.getHistory().size(), "некорректное значение");
-        int idOfTask3 = historyManager.getHistory().get(2).getId();
-        int idOfTask1 = historyManager.getHistory().get(0).getId();
         historyManager.remove(task2.getId());
-        assertEquals(2, historyManager.getHistory().size(), "некорректное значение");
-        assertEquals(idOfTask3, historyManager.getHistory().get(1).getId());
-        assertEquals(idOfTask1, historyManager.getHistory().get(0).getId());
+        assertEquals(List.of(task1, task3), historyManager.getHistory());
     }
 
     @Test
@@ -65,11 +59,7 @@ public class InMemoryHistoryManagerTest {
         historyManager.add(task2);
         historyManager.add(task3);
         assertEquals(3, historyManager.getHistory().size(), "некорректное значение");
-        int idOfTask1 = historyManager.getHistory().get(0).getId();
-        int idOfTask2 = historyManager.getHistory().get(1).getId();
         historyManager.remove(task3.getId());
-        assertEquals(2, historyManager.getHistory().size(), "некорректное значение");
-        assertEquals(idOfTask1, historyManager.getHistory().get(0).getId(), "некорректное значение");
-        assertEquals(idOfTask2, historyManager.getHistory().get(1).getId(), "некорректное значение");
+        assertEquals(List.of(task1, task2), historyManager.getHistory(), "некорректное значение");
     }
 }

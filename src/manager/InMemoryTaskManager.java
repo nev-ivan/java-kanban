@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class InMemoryTaskManager implements TaskManager {
@@ -34,32 +33,32 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteAllTasks() {
-        for (Integer key : taskMap.keySet()) {
-            historyManager.remove(key);
+        for (Integer taskId : taskMap.keySet()) {
+            historyManager.remove(taskId);
         }
         taskMap.clear();
     }
 
     @Override
     public void deleteAllSubTasks() {
-        for (Integer key : subTaskMap.keySet()) {
-            historyManager.remove(key);
+        for (Integer subtaskId : subTaskMap.keySet()) {
+            historyManager.remove(subtaskId);
         }
-        for (Map.Entry<Integer, EpicTask> epic : epicMap.entrySet()) {
-            epic.getValue().clearSubTaskIds();
-            updateEpicStatus(epic.getValue());
+        for (EpicTask epic : epicMap.values()) {
+            epic.clearSubTaskIds();
+            updateEpicStatus(epic);
         }
         subTaskMap.clear();
     }
 
     @Override
     public void deleteAllEpic() {
-        for (Integer key : subTaskMap.keySet()) {
-            historyManager.remove(key);
+        for (Integer subtaskId : subTaskMap.keySet()) {
+            historyManager.remove(subtaskId);
         }
         subTaskMap.clear();
-        for (Integer key : epicMap.keySet()) {
-            historyManager.remove(key);
+        for (Integer epicId : epicMap.keySet()) {
+            historyManager.remove(epicId);
         }
         epicMap.clear();
     }
