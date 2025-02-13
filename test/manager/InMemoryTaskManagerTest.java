@@ -7,6 +7,8 @@ import task.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class InMemoryTaskManagerTest {
@@ -125,5 +127,13 @@ public class InMemoryTaskManagerTest {
         taskManager.getTask(task.getId());
         taskManager.getSubTask(subTask.getId());
         assertEquals(2, taskManager.getHistory().size());
+    }
+
+    @Test
+    void deleteSubtaskFromEpic() {
+        int subId = subTask.getId();
+        taskManager.deleteSubTask(subId);
+        ArrayList<Integer> subIds = epicTask.getSubTasksIds();
+        assertFalse(subIds.contains(subId), "Ошибка, id все еще внутри");
     }
 }
