@@ -21,7 +21,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         int counterId = 0;
         boolean notBlank = true;
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-           String lineTest =  reader.readLine();
+            String lineTest = reader.readLine();
             while (reader.ready() && notBlank) {
                 String line = reader.readLine();
                 if (line.isBlank()) {
