@@ -32,9 +32,8 @@ public class FileBackedTaskManagerTest {
         taskManager.addNewTask(task1);
         taskManager.addNewTask(task2);
         taskManager.addNewTask(task3);
-        taskManager.addNewSubTask(task5);
         taskManager.addNewEpic(task4);
-
+        taskManager.addNewSubTask(task5);
     }
 
     @Test
