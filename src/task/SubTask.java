@@ -7,15 +7,12 @@ public class SubTask extends Task {
     public SubTask(String name, String taskDescription, int idOfEpic) {
         super(name, taskDescription);
         this.idOfEpic = idOfEpic;
-        status = TaskStatus.NEW;
-        type = TaskType.SUBTASK;
     }
 
     public SubTask(int id, String name, String taskDescription, int idOfEpic) {
         super(id, name, taskDescription);
         this.idOfEpic = idOfEpic;
         status = TaskStatus.NEW;
-        type = TaskType.SUBTASK;
     }
 
     public int getIdOfEpic() {
@@ -23,7 +20,12 @@ public class SubTask extends Task {
     }
 
     @Override
+    public TaskType getType() {
+        return TaskType.SUBTASK;
+    }
+
+    @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s,%s%n", id, type, name, status, taskDescription, idOfEpic);
+        return String.format("%s,%s,%s,%s,%s,%s%n", id, getType(), name, status, taskDescription, idOfEpic);
     }
 }

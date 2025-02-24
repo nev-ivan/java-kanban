@@ -10,14 +10,11 @@ public class Task {
 
     protected TaskStatus status;
 
-    protected TaskType type;
-
     public Task(int id, String name, String taskDescription) {
         this.id = id;
         this.name = name;
         this.taskDescription = taskDescription;
         status = TaskStatus.NEW;
-        type = TaskType.TASK;
     }
 
     public Task(String name, String taskDescription) {
@@ -41,7 +38,7 @@ public class Task {
     }
 
     public TaskType getType() {
-        return type;
+        return TaskType.TASK;
     }
 
     public void setName(String name) {
@@ -62,7 +59,7 @@ public class Task {
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s %n", id, type, name, status, taskDescription);
+        return String.format("%s,%s,%s,%s,%s %n", id, getType(), name, status, taskDescription);
     }
 
     @Override

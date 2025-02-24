@@ -5,12 +5,13 @@ import task.*;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
 import java.util.List;
+
+import static manager.CSVTaskFormat.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
-    String firstLine = "id,type,name,status,description,epic";
+    private final static String firstLine = "id,type,name,status,description,epic";
 
     public FileBackedTaskManager(File file) {
         this.file = file;
@@ -19,15 +20,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static FileBackedTaskManager loadFromFile(File file) {
         final FileBackedTaskManager taskManager = new FileBackedTaskManager(file);
         int counterId = 0;
-        boolean notBlank = true;
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String lineTest = reader.readLine();
-            while (reader.ready() && notBlank) {
+            reader.readLine();
+            while (reader.ready()) {
                 String line = reader.readLine();
                 if (line.isBlank()) {
                     break;
                 }
-                Task task = taskManager.taskFromString(line);
+                Task task = taskFromString(line);
                 taskManager.addTask(task);
                 if (task.getId() > counterId) {
                     counterId = task.getId();
@@ -37,7 +37,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
             String line = reader.readLine();
             if (line != null) {
-                List<Integer> history = taskManager.historyFromString(line);
+                List<Integer> history = historyFromString(line);
                 for (Integer id : history) {
                     if (taskManager.taskMap.containsKey(id)) {
                         Task task = taskManager.taskMap.get(id);
@@ -52,11 +52,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 }
             }
 
-
         } catch (IOException e) {
             System.out.println("Произошла ошибка чтения файла");
         }
-
         return taskManager;
     }
 
@@ -162,15 +160,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             for (Task task : taskMap.values()) {
                 writer.write(task.toString());
             }
-
-            for (SubTask subTask : subTaskMap.values()) {
-                writer.write(subTask.toString());
-            }
-
             for (EpicTask epicTask : epicMap.values()) {
                 writer.write(epicTask.toString());
             }
-
+            for (SubTask subTask : subTaskMap.values()) {
+                writer.write(subTask.toString());
+            }
             writer.write(" \n");
             writer.write(historyToString(getHistory()));
 
@@ -179,68 +174,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         }
     }
 
-    private Task taskFromString(String line) {
-        String[] taskInArray = line.split(",");
-        Task task;
-        switch (taskInArray[1]) {
-            case "SUBTASK":
-                task = new SubTask(Integer.parseInt(taskInArray[0]), taskInArray[2].trim(), taskInArray[4].trim(),
-                        Integer.parseInt(taskInArray[5]));
-                if (taskInArray[3].equals("IN_PROGRESS")) {
-                    task.setStatus(TaskStatus.IN_PROGRESS);
-                } else if (taskInArray[3].equals("DONE")) {
-                    task.setStatus(TaskStatus.DONE);
-                }
-                break;
-            case "TASK":
-                task = new Task(Integer.parseInt(taskInArray[0]), taskInArray[2].trim(), taskInArray[4].trim());
-                if (taskInArray[3].equals("IN_PROGRESS")) {
-                    task.setStatus(TaskStatus.IN_PROGRESS);
-                } else if (taskInArray[3].equals("DONE")) {
-                    task.setStatus(TaskStatus.DONE);
-                }
-                break;
-            case "EPIC":
-                task = new EpicTask(Integer.parseInt(taskInArray[0]), taskInArray[2].trim(), taskInArray[4].trim());
-                if (taskInArray[3].equals("IN_PROGRESS")) {
-                    task.setStatus(TaskStatus.IN_PROGRESS);
-                } else if (taskInArray[3].equals("DONE")) {
-                    task.setStatus(TaskStatus.DONE);
-                }
-                break;
-            default:
-                return null;
-        }
-        return task;
-    }
-
     private void addTask(Task task) {
         if (task != null) {
             switch (task.getType()) {
-                case TASK -> taskMap.put(task.getId(), task);
-                case SUBTASK -> subTaskMap.put(task.getId(), (SubTask) task);
-                case EPIC -> epicMap.put(task.getId(), (EpicTask) task);
+                case TASK:
+                    taskMap.put(task.getId(), task);
+                    break;
+                case SUBTASK:
+                    subTaskMap.put(task.getId(), (SubTask) task);
+                    epicMap.get(((SubTask) task).getIdOfEpic()).addSubtaskId(task.getId());
+                    break;
+                case EPIC:
+                    epicMap.put(task.getId(), (EpicTask) task);
             }
         }
     }
 
-    private List<Integer> historyFromString(String line) {
-        if (line == null) {
-            return null;
-        }
-        List<Integer> tasksId = new ArrayList<>();
-        String[] idInStringArray = line.split(",");
-        for (String s : idInStringArray) {
-            tasksId.add(Integer.parseInt(s));
-        }
-        return tasksId;
-    }
 
-    private String historyToString(List<Task> history) {
-        StringBuilder line = new StringBuilder();
-        for (Task task : history) {
-            line.append(task.getId() + ",");
-        }
-        return line.toString();
-    }
 }

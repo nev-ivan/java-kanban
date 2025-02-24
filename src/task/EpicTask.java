@@ -8,13 +8,11 @@ public class EpicTask extends Task {
 
     public EpicTask(int id, String name, String taskDescription) {
         super(id, name, taskDescription);
-        type = TaskType.EPIC;
     }
 
     public EpicTask(String name, String taskDescription) {
         super(name, taskDescription);
         status = TaskStatus.NEW;
-        type = TaskType.EPIC;
     }
 
     public void addSubtaskId(int id) {
@@ -38,7 +36,12 @@ public class EpicTask extends Task {
     }
 
     @Override
+    public TaskType getType() {
+        return TaskType.EPIC;
+    }
+
+    @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s%n", id, type, name, status, taskDescription);
+        return String.format("%s,%s,%s,%s,%s%n", id, getType(), name, status, taskDescription);
     }
 }

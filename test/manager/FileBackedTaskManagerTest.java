@@ -28,7 +28,7 @@ public class FileBackedTaskManagerTest {
         task4 = new EpicTask(4, "44", "444");
         task5 = new SubTask(5, "55", "555", 4);
         file = File.createTempFile("task", ".csv");
-        taskManager = FileBackedTaskManager.loadFromFile(file);
+        taskManager = new FileBackedTaskManager(file);
         taskManager.addNewTask(task1);
         taskManager.addNewTask(task2);
         taskManager.addNewTask(task3);
@@ -39,10 +39,10 @@ public class FileBackedTaskManagerTest {
     @Test
     void saveAndLoadFromFileTest() {
         FileBackedTaskManager taskManagerTest = FileBackedTaskManager.loadFromFile(file);
-        assertEquals(taskManager.taskMap, taskManagerTest.taskMap, "Функция работает некорректно.");
-        assertEquals(3, taskManagerTest.taskMap.size(), "Некорректное значение");
-        assertEquals(1, taskManagerTest.subTaskMap.size(), "Некорректное значение");
-        assertEquals(1, taskManagerTest.epicMap.size(), "Некорректное значение");
+        assertEquals(taskManager.getTasks(), taskManagerTest.getTasks(), "Найдены различия в Task");
+        assertEquals(taskManager.getSubTasks(), taskManagerTest.getSubTasks(), "Найдены различия в SubTask");
+        assertEquals(taskManager.getEpicTasks(), taskManagerTest.getEpicTasks(), "Найдены различия в EpicTask");
+        assertEquals(taskManager.getHistory(), taskManagerTest.getHistory(), "История просмотров отличается");
     }
 
     @Test
