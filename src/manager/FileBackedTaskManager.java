@@ -11,7 +11,7 @@ import static manager.CSVTaskFormat.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private final File file;
-    private final static String firstLine = "id,type,name,status,description,epic";
+    private static final String firstLine = "id,type,name,status,description,epic";
 
     public FileBackedTaskManager(File file) {
         this.file = file;
