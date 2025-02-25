@@ -7,6 +7,7 @@ public class Task {
     protected String name;
     protected String taskDescription;
     protected int id;
+
     protected TaskStatus status;
 
     public Task(int id, String name, String taskDescription) {
@@ -36,6 +37,10 @@ public class Task {
         return status;
     }
 
+    public TaskType getType() {
+        return TaskType.TASK;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -53,16 +58,16 @@ public class Task {
     }
 
     @Override
+    public String toString() {
+        return String.format("%s,%s,%s,%s,%s %n", id, getType(), name, status, taskDescription);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Task task = (Task) o;
         return Objects.equals(id, task.id);
-    }
-
-    @Override
-    public String toString() {
-        return "name=" + name + ", taskDescription=" + taskDescription + ", status=" + status;
     }
 
     @Override
