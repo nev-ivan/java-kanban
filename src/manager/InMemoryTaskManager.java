@@ -2,11 +2,8 @@ package manager;
 
 import task.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.Duration;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -15,6 +12,8 @@ public class InMemoryTaskManager implements TaskManager {
     protected HashMap<Integer, EpicTask> epicMap = new HashMap<>();
     protected HashMap<Integer, SubTask> subTaskMap = new HashMap<>();
     protected HistoryManager historyManager = Managers.getDefaultHistoryManager();
+    Comparator<Task> timeComparator = new TimeComparator();
+    protected TreeSet<Task> timeSortedTasks = new TreeSet<>(timeComparator);
 
     @Override
     public ArrayList<Task> getTasks() {
@@ -36,6 +35,7 @@ public class InMemoryTaskManager implements TaskManager {
         for (Integer taskId : taskMap.keySet()) {
             historyManager.remove(taskId);
         }
+        taskMap.values().stream().map(task -> timeSortedTasks.remove(task));
         taskMap.clear();
     }
 
@@ -46,8 +46,9 @@ public class InMemoryTaskManager implements TaskManager {
         }
         for (EpicTask epic : epicMap.values()) {
             epic.clearSubTaskIds();
-            updateEpicStatus(epic);
+            updateEpicParameters(epic);
         }
+        subTaskMap.values().stream().map(task -> timeSortedTasks.remove(task));
         subTaskMap.clear();
     }
 
@@ -56,10 +57,12 @@ public class InMemoryTaskManager implements TaskManager {
         for (Integer subtaskId : subTaskMap.keySet()) {
             historyManager.remove(subtaskId);
         }
+        subTaskMap.values().stream().map(task -> timeSortedTasks.remove(task));
         subTaskMap.clear();
         for (Integer epicId : epicMap.keySet()) {
             historyManager.remove(epicId);
         }
+        epicMap.values().stream().map(task -> timeSortedTasks.remove(task));
         epicMap.clear();
     }
 
@@ -89,6 +92,9 @@ public class InMemoryTaskManager implements TaskManager {
         int id = ++countId;
         task.setId(id);
         taskMap.put(id, task);
+        if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(task, oldTask))) {
+            timeSortedTasks.add(task);
+        }
         return id;
     }
 
@@ -106,7 +112,11 @@ public class InMemoryTaskManager implements TaskManager {
         subTaskMap.put(id, subTask);
 
         epic.addSubtaskId(id);
-        updateEpicStatus(epic);
+        updateEpicParameters(epic);
+
+        if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(subTask, oldTask))) {
+            timeSortedTasks.add(subTask);
+        }
         return id;
     }
 
@@ -115,26 +125,36 @@ public class InMemoryTaskManager implements TaskManager {
         int id = ++countId;
         epicTask.setId(id);
         epicMap.put(id, epicTask);
-        updateEpicStatus(epicTask);
+        updateEpicParameters(epicTask);
         return id;
     }
 
     @Override
     public void updateTask(Task task) {
         if (taskMap.containsValue(task)) {
+            timeSortedTasks.remove(taskMap.get(task.getId()));
             taskMap.put(task.getId(), task);
         } else {
             System.out.println("There is no such task");
+        }
+
+        if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(task, oldTask))) {
+            timeSortedTasks.add(task);
         }
     }
 
     @Override
     public void updateSubTask(SubTask subTask) {
         if (subTaskMap.containsValue(subTask)) {
+            timeSortedTasks.remove(subTaskMap.get(subTask.getId()));
             subTaskMap.put(subTask.getId(), subTask);
-            updateEpicStatus(epicMap.get(subTask.getIdOfEpic()));
+            updateEpicParameters(epicMap.get(subTask.getIdOfEpic()));
         } else {
             System.out.println("There is no such subTask");
+        }
+
+        if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(subTask, oldTask))) {
+            timeSortedTasks.add(subTask);
         }
     }
 
@@ -142,15 +162,15 @@ public class InMemoryTaskManager implements TaskManager {
     public void updateEpic(EpicTask epicTask) {
         if (epicMap.containsValue(epicTask)) {
             epicMap.put(epicTask.getId(), epicTask);
-            updateEpicStatus(epicTask);
+            updateEpicParameters(epicTask);
         } else {
             System.out.println("There is no such epic");
         }
-
     }
 
     @Override
     public void deleteTask(int id) {
+        timeSortedTasks.remove(taskMap.get(id));
         taskMap.remove(id);
         historyManager.remove(id);
 
@@ -158,11 +178,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void deleteSubTask(int id) {
+        timeSortedTasks.remove(subTaskMap.get(id));
         SubTask subTask = subTaskMap.get(id);
         EpicTask epicTask = epicMap.get(subTask.getIdOfEpic());
         epicTask.deleteSubTask(id);
         subTaskMap.remove(id);
-        updateEpicStatus(epicTask);
+        updateEpicParameters(epicTask);
         historyManager.remove(id);
 
     }
@@ -171,22 +192,19 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteEpic(int id) {
         EpicTask epicForDelete = epicMap.get(id);
         for (int subId : epicForDelete.getSubTasksIds()) {
+            timeSortedTasks.remove(subTaskMap.get(subId));
             subTaskMap.remove(subId);
             historyManager.remove(subId);
         }
+        timeSortedTasks.remove(epicMap.get(id));
         epicMap.remove(id);
         historyManager.remove(id);
     }
 
     @Override
-    public ArrayList<SubTask> subTasksOfEpic(int epicId) {
-        EpicTask epic = epicMap.get(epicId);
-        ArrayList<Integer> subTasksId = epic.getSubTasksIds();
-        ArrayList<SubTask> subTasksOfEpic = new ArrayList<>();
-        for (int id : subTasksId) {
-            subTasksOfEpic.add(subTaskMap.get(id));
-        }
-        return subTasksOfEpic;
+    public List<SubTask> getEpicSubtasks(int epicId) {
+        return epicMap.get(epicId).getSubTasksIds().stream()
+                .map(id -> subTaskMap.get(id)).toList();
     }
 
     @Override
@@ -194,7 +212,28 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
-    private void updateEpicStatus(EpicTask epicTask) {
+    public TreeSet getPrioritizedTasks() {
+        return timeSortedTasks;
+    }
+
+    public boolean isTaskTimeNotCross(Task task1, Task task2) {
+
+        if (task1.getStartTime() == null || task2.getStartTime() == null) {
+            return false;
+        }
+
+        if (task2.getStartTime().isBefore(task1.getStartTime()) &&
+                task2.getEndTime().isAfter(task1.getStartTime())) {
+            return false;
+        } else if (task2.getStartTime().isAfter(task1.getStartTime()) &&
+                task2.getStartTime().isBefore(task1.getEndTime())) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private void updateEpicParameters(EpicTask epicTask) {
         ArrayList<Integer> subTasksId = epicTask.getSubTasksIds();
         Set<TaskStatus> allStatusOfEpic = new HashSet<>();
         for (int id : subTasksId) {
@@ -207,6 +246,22 @@ public class InMemoryTaskManager implements TaskManager {
             epicTask.setStatus(TaskStatus.DONE);
         } else {
             epicTask.setStatus(TaskStatus.IN_PROGRESS);
+        }
+
+        List<SubTask> allSubSort = epicTask.getSubTasksIds().stream()
+                .map(subTaskId -> subTaskMap.get(subTaskId))
+                .sorted(timeComparator)
+                .toList();
+
+        long durationMinutes = 0;
+        for (SubTask sub : allSubSort) {
+            durationMinutes = durationMinutes + sub.getDuration().toMinutes();
+        }
+
+        if (!allSubSort.isEmpty()) {
+            epicTask.setStartTime(allSubSort.getFirst().getStartTime());
+            epicTask.setEndTime(allSubSort.getLast().getEndTime());
+            epicTask.setDuration(Duration.ofMinutes(durationMinutes));
         }
     }
 }
