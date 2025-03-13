@@ -66,4 +66,12 @@ public class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskMan
         assertTrue(taskManagerTest.subTaskMap.isEmpty());
         assertTrue(taskManagerTest.epicMap.isEmpty());
     }
+
+    @Test
+    void timeSortTasksLoadFromFileTest() {
+        FileBackedTaskManager taskManager2 = FileBackedTaskManager.loadFromFile(file);
+        assertEquals(2, taskManager2.getPrioritizedTasks().size(), "Отсортированный список не загружается из файла");
+        assertEquals(taskManager.getPrioritizedTasks(), taskManager2.getPrioritizedTasks(),
+                "Отсортированный список подгружается из файла некорректно");
+    }
 }

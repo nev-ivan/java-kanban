@@ -13,12 +13,4 @@ public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager
         taskManager = new InMemoryTaskManager();
         init();
     }
-
-    @Test
-    void crossTimeInTasksTest() {
-        Task task1 = new Task("task2", "crossTimeTask", subTask.getEndTime().minusMinutes(5), 20);
-        assertFalse(taskManager.isTaskTimeNotCross(subTask, task1));
-        assertTrue(taskManager.isTaskTimeNotCross(task, task1));
-    }
-
 }

@@ -31,6 +31,8 @@ public class Task {
         this.id = id;
         this.name = name;
         this.description = description;
+        startTime = LocalDateTime.now();
+        duration = Duration.ofMinutes(10);
         status = TaskStatus.NEW;
     }
 

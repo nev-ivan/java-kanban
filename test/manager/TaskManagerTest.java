@@ -167,4 +167,20 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.updateSubTask(subtaskDone);
         assertEquals(TaskStatus.IN_PROGRESS, epicTask.getStatus(), "Статус рассчитан неверно");
     }
+
+    @Test
+    void crossTimeInTasksTest() {
+        Task task1 = new Task("task2", "crossTimeTask", subTask.getEndTime().minusMinutes(5), 20);
+        assertEquals(2, taskManager.getPrioritizedTasks().size(), "Задачи не добавляются в сортированный список");
+        taskManager.addNewTask(task1);
+        assertFalse(taskManager.getPrioritizedTasks().contains(task1), "Задача не должна добавляться");
+        assertFalse(taskManager.getTasks().contains(task1), "Задача не должна добавиться в мапу");
+    }
+
+    @Test
+    void timeSortTest() {
+       LocalDateTime timeBefore = taskManager.getPrioritizedTasks().get(0).getStartTime();
+       LocalDateTime timeAfter = taskManager.getPrioritizedTasks().get(1).getStartTime();
+       assertTrue(timeBefore.isBefore(timeAfter));
+    }
 }

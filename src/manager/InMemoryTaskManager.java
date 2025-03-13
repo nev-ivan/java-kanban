@@ -21,8 +21,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected HashMap<Integer, EpicTask> epicMap = new HashMap<>();
     protected HashMap<Integer, SubTask> subTaskMap = new HashMap<>();
     protected HistoryManager historyManager = Managers.getDefaultHistoryManager();
-    Comparator<Task> timeComparator = new TimeComparator();
-    protected TreeSet<Task> timeSortedTasks = new TreeSet<>(timeComparator);
+    protected TreeSet<Task> timeSortedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     @Override
     public ArrayList<Task> getTasks() {
@@ -71,7 +70,6 @@ public class InMemoryTaskManager implements TaskManager {
         for (Integer epicId : epicMap.keySet()) {
             historyManager.remove(epicId);
         }
-        epicMap.values().stream().map(task -> timeSortedTasks.remove(task));
         epicMap.clear();
     }
 
@@ -98,35 +96,41 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public int addNewTask(Task task) {
-        int id = ++countId;
-        task.setId(id);
-        taskMap.put(id, task);
         if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(task, oldTask))) {
+            int id = ++countId;
+            task.setId(id);
+            taskMap.put(id, task);
             timeSortedTasks.add(task);
+            return id;
+        } else {
+            return -1;
         }
-        return id;
     }
 
     @Override
     public int addNewSubTask(SubTask subTask) {
+        if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(subTask, oldTask))) {
 
-        if (!epicMap.containsKey(subTask.getIdOfEpic())) {
-            System.out.println("There is no such epic");
+            if (!epicMap.containsKey(subTask.getIdOfEpic())) {
+                System.out.println("There is no such epic");
+                return -1;
+            }
+
+            EpicTask epic = epicMap.get(subTask.getIdOfEpic());
+            int id = ++countId;
+            subTask.setId(id);
+            subTaskMap.put(id, subTask);
+
+            epic.addSubtaskId(id);
+            updateEpicParameters(epic);
+
+
+            timeSortedTasks.add(subTask);
+            return id;
+        } else {
             return -1;
         }
 
-        EpicTask epic = epicMap.get(subTask.getIdOfEpic());
-        int id = ++countId;
-        subTask.setId(id);
-        subTaskMap.put(id, subTask);
-
-        epic.addSubtaskId(id);
-        updateEpicParameters(epic);
-
-        if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(subTask, oldTask))) {
-            timeSortedTasks.add(subTask);
-        }
-        return id;
     }
 
     @Override
@@ -141,30 +145,38 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void updateTask(Task task) {
         if (taskMap.containsValue(task)) {
-            timeSortedTasks.remove(taskMap.get(task.getId()));
-            taskMap.put(task.getId(), task);
+            Task oldTask = taskMap.get(task.getId());
+            timeSortedTasks.remove(oldTask);
+
+            if (timeSortedTasks.stream().allMatch(taskInSet -> isTaskTimeNotCross(task, taskInSet))) {
+                taskMap.put(task.getId(), task);
+                timeSortedTasks.add(task);
+            } else {
+                timeSortedTasks.add(oldTask);
+            }
+
         } else {
             System.out.println("There is no such task");
         }
 
-        if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(task, oldTask))) {
-            timeSortedTasks.add(task);
-        }
     }
 
     @Override
     public void updateSubTask(SubTask subTask) {
         if (subTaskMap.containsValue(subTask)) {
-            timeSortedTasks.remove(subTaskMap.get(subTask.getId()));
-            subTaskMap.put(subTask.getId(), subTask);
-            updateEpicParameters(epicMap.get(subTask.getIdOfEpic()));
+            SubTask oldSubTask = subTaskMap.get(subTask.getId());
+            timeSortedTasks.remove(oldSubTask);
+            if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(subTask, oldTask))) {
+                subTaskMap.put(subTask.getId(), subTask);
+                timeSortedTasks.add(subTask);
+                updateEpicParameters(epicMap.get(subTask.getIdOfEpic()));
+            } else {
+                timeSortedTasks.add(oldSubTask);
+            }
         } else {
             System.out.println("There is no such subTask");
         }
 
-        if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(subTask, oldTask))) {
-            timeSortedTasks.add(subTask);
-        }
     }
 
     @Override
@@ -205,7 +217,6 @@ public class InMemoryTaskManager implements TaskManager {
             subTaskMap.remove(subId);
             historyManager.remove(subId);
         }
-        timeSortedTasks.remove(epicMap.get(id));
         epicMap.remove(id);
         historyManager.remove(id);
     }
@@ -221,25 +232,19 @@ public class InMemoryTaskManager implements TaskManager {
         return historyManager.getHistory();
     }
 
-    public TreeSet getPrioritizedTasks() {
-        return timeSortedTasks;
+    @Override
+    public List<Task> getPrioritizedTasks() {
+        return timeSortedTasks.stream().toList();
     }
 
-    public boolean isTaskTimeNotCross(Task task1, Task task2) {
+    private boolean isTaskTimeNotCross(Task task1, Task task2) {
 
         if (task1.getStartTime() == null || task2.getStartTime() == null) {
             return false;
         }
 
-        if (task2.getStartTime().isBefore(task1.getStartTime()) &&
-                task2.getEndTime().isAfter(task1.getStartTime())) {
-            return false;
-        } else if (task2.getStartTime().isAfter(task1.getStartTime()) &&
-                task2.getStartTime().isBefore(task1.getEndTime())) {
-            return false;
-        } else {
-            return true;
-        }
+        return !task1.getStartTime().isBefore(task2.getEndTime()) ||
+                !task1.getEndTime().isAfter(task2.getStartTime());
     }
 
     private void updateEpicParameters(EpicTask epicTask) {
@@ -259,7 +264,7 @@ public class InMemoryTaskManager implements TaskManager {
 
         List<SubTask> allSubSort = epicTask.getSubTasksIds().stream()
                 .map(subTaskId -> subTaskMap.get(subTaskId))
-                .sorted(timeComparator)
+                .sorted(Comparator.comparing(Task::getStartTime))
                 .toList();
 
         long durationMinutes = 0;
