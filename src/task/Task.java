@@ -1,32 +1,47 @@
 package task;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
 
     protected String name;
-    protected String taskDescription;
+    protected String description;
     protected int id;
+    protected Duration duration;
+    protected LocalDateTime startTime;
 
     protected TaskStatus status;
 
-    public Task(int id, String name, String taskDescription) {
+    public Task(int id, String name, String description, LocalDateTime startTime, long durationMinutes) {
         this.id = id;
         this.name = name;
-        this.taskDescription = taskDescription;
+        this.description = description;
+        duration = Duration.ofMinutes(durationMinutes);
+        this.startTime = startTime;
         status = TaskStatus.NEW;
     }
 
-    public Task(String name, String taskDescription) {
-        this(0, name, taskDescription);
+    public Task(String name, String description, LocalDateTime startTime, long durationMinutes) {
+        this(0, name, description, startTime, durationMinutes);
+    }
+
+    public Task(int id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        startTime = LocalDateTime.now();
+        duration = Duration.ofMinutes(10);
+        status = TaskStatus.NEW;
     }
 
     public String getName() {
         return name;
     }
 
-    public String getTaskDescription() {
-        return taskDescription;
+    public String getDescription() {
+        return description;
     }
 
     public int getId() {
@@ -45,8 +60,8 @@ public class Task {
         this.name = name;
     }
 
-    public void setTaskDescription(String taskDescription) {
-        this.taskDescription = taskDescription;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setId(int id) {
@@ -57,9 +72,22 @@ public class Task {
         this.status = status;
     }
 
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
     @Override
     public String toString() {
-        return String.format("%s,%s,%s,%s,%s %n", id, getType(), name, status, taskDescription);
+        return String.format("%s,%s,%s,%s,%s,%s,%s %n",
+                id, getType(), name, status, description, startTime, duration.toMinutes());
     }
 
     @Override

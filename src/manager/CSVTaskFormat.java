@@ -2,6 +2,7 @@ package manager;
 
 import task.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,17 +34,19 @@ public class CSVTaskFormat {
         final String name = taskInArray[2].trim();
         final TaskStatus status = TaskStatus.valueOf(taskInArray[3]);
         final String description = taskInArray[4].trim();
+        final LocalDateTime startTime = LocalDateTime.parse(taskInArray[5]);
+        final long duration = Long.parseLong(taskInArray[6].trim());
         Task task;
         switch (type) {
             case SUBTASK:
-                int idOfEpic = Integer.parseInt(taskInArray[5]);
-                task = new SubTask(id, name, description, idOfEpic);
+                int idOfEpic = Integer.parseInt(taskInArray[7]);
+                task = new SubTask(id, name, description, idOfEpic, startTime, duration);
                 break;
             case TASK:
-                task = new Task(id, name, description);
+                task = new Task(id, name, description, startTime, duration);
                 break;
             case EPIC:
-                task = new EpicTask(id, name, description);
+                task = new EpicTask(id, name, description, startTime, duration);
                 break;
             default:
                 return null;
