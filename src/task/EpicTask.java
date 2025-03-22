@@ -9,8 +9,9 @@ public class EpicTask extends Task {
     protected LocalDateTime endTime;
     protected ArrayList<Integer> subTasksIds = new ArrayList<>();
 
-    public EpicTask(int id, String name, String description, LocalDateTime startTime, Long duration) {
+    public EpicTask(int id, String name, String description, LocalDateTime startTime, long duration) {
         super(id, name, description, startTime, duration);
+        endTime = startTime.plusMinutes(duration);
     }
 
     public EpicTask(int id, String name, String description) {
