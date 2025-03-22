@@ -15,7 +15,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     protected SubTask subTask;
     protected EpicTask epicTask;
 
-    protected void init() {
+    protected void init() throws TaskValidationException {
         task = new Task(1, "testTask", "taskTest", LocalDateTime.now(), 15);
         epicTask = new EpicTask(2, "epicTest", "testEpic");
         subTask = new SubTask(3, "subTest", "testSub", 2, task.getEndTime(), 10);
@@ -43,7 +43,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void addSubtaskInSubtaskTest() {
+    void addSubtaskInSubtaskTest() throws TaskValidationException {
         SubTask subTask2 = new SubTask("subTask2", "testSubTask2", subTask.getId(),
                 LocalDateTime.now().plusDays(1), 10);
         taskManager.addNewSubTask(subTask2);
@@ -152,7 +152,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void updateEpicStatusTest() {
+    void updateEpicStatusTest() throws TaskValidationException {
         assertEquals(TaskStatus.NEW, epicTask.getStatus(), "Статус рассчитан неверно");
         SubTask subtaskDone = new SubTask("newSub", "subDone", epicTask.getId(), subTask.getEndTime(), 15);
         subtaskDone.setStatus(TaskStatus.DONE);
@@ -169,12 +169,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
 
     @Test
-    void crossTimeInTasksTest() {
+    void crossTimeInTasksTest() throws TaskValidationException {
         Task task1 = new Task("task2", "crossTimeTask", subTask.getEndTime().minusMinutes(5), 20);
         assertEquals(2, taskManager.getPrioritizedTasks().size(), "Задачи не добавляются в сортированный список");
-        taskManager.addNewTask(task1);
-        assertFalse(taskManager.getPrioritizedTasks().contains(task1), "Задача не должна добавляться");
-        assertFalse(taskManager.getTasks().contains(task1), "Задача не должна добавиться в мапу");
+        assertThrows(TaskValidationException.class, () -> taskManager.addNewTask(task1));
     }
 
     @Test

@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class InMemoryTaskManagerTest extends TaskManagerTest<InMemoryTaskManager> {
 
     @BeforeEach
-    void beforeEach() {
+    void beforeEach() throws TaskValidationException {
         taskManager = new InMemoryTaskManager();
         init();
     }
