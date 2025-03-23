@@ -26,9 +26,9 @@ public interface TaskManager {
 
     EpicTask getEpicTask(int id);
 
-    int addNewTask(Task task);
+    int addNewTask(Task task) throws TaskValidationException;
 
-    int addNewSubTask(SubTask subTask);
+    int addNewSubTask(SubTask subTask) throws TaskValidationException;
 
     int addNewEpic(EpicTask epicTask);
 

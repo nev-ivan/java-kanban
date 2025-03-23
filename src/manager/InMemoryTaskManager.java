@@ -95,7 +95,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public int addNewTask(Task task) {
+    public int addNewTask(Task task) throws TaskValidationException {
         if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(task, oldTask))) {
             int id = ++countId;
             task.setId(id);
@@ -103,12 +103,12 @@ public class InMemoryTaskManager implements TaskManager {
             timeSortedTasks.add(task);
             return id;
         } else {
-            return -1;
+            throw new TaskValidationException();
         }
     }
 
     @Override
-    public int addNewSubTask(SubTask subTask) {
+    public int addNewSubTask(SubTask subTask) throws TaskValidationException {
         if (timeSortedTasks.stream().allMatch(oldTask -> isTaskTimeNotCross(subTask, oldTask))) {
 
             if (!epicMap.containsKey(subTask.getIdOfEpic())) {
@@ -128,7 +128,7 @@ public class InMemoryTaskManager implements TaskManager {
             timeSortedTasks.add(subTask);
             return id;
         } else {
-            return -1;
+            throw new TaskValidationException();
         }
 
     }

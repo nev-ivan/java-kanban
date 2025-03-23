@@ -98,14 +98,14 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public int addNewTask(Task task) {
+    public int addNewTask(Task task) throws TaskValidationException {
         final int idNewTask = super.addNewTask(task);
         save();
         return idNewTask;
     }
 
     @Override
-    public int addNewSubTask(SubTask subTask) {
+    public int addNewSubTask(SubTask subTask) throws TaskValidationException {
         final int idNewSubTask = super.addNewSubTask(subTask);
         save();
         return idNewSubTask;
