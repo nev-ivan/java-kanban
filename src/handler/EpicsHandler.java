@@ -20,11 +20,13 @@ public class EpicsHandler extends BaseHttpHandler {
         final Integer idFromRequest = getIdFromPath(exchange.getRequestURI().getPath());
         switch (exchange.getRequestMethod()) {
             case "GET":
-                final EpicTask epic = manager.getEpicTask(idFromRequest);
-                if (splitPath.length == 4 && epic != null) {
-                    final List<SubTask> subtasks = epic.getSubTasksIds().stream()
-                            .map(manager::getSubTask)
-                            .toList();
+                if (splitPath.length == 4) {
+                    final List<SubTask> subtasks = manager.getEpicSubtasks(idFromRequest);
+                    if (subtasks == null) {
+                        System.out.println("Эпика с id = " + idFromRequest + " не найдено");
+                        sendNotFound(exchange);
+                        return;
+                    }
                     String response = gson.toJson(subtasks);
                     System.out.println("Получили подзадачи эпика с id = " + idFromRequest);
                     sendText(exchange, response);
@@ -35,13 +37,16 @@ public class EpicsHandler extends BaseHttpHandler {
                     System.out.println("Получили список всех эпиков");
                     sendText(exchange, response);
                     return;
-                } else if (epic != null) {
+                } else if (splitPath.length == 3) {
+                    final EpicTask epic = manager.getEpicTask(idFromRequest);
+                    if (epic == null) {
+                        System.out.println("Эпика с id = " + idFromRequest + " не найдено");
+                        sendNotFound(exchange);
+                        return;
+                    }
                     final String response = gson.toJson(epic);
                     System.out.println("Получили эпик по id: " + idFromRequest);
                     sendText(exchange, response);
-                } else {
-                    System.out.println("Эпика с id = " + idFromRequest + " не найдено");
-                    sendNotFound(exchange);
                 }
                 break;
 
