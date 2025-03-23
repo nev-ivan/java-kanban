@@ -1,9 +1,6 @@
 package handler;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import http.HttpTaskServer;
 import manager.TaskManager;
 import manager.TaskValidationException;
 import task.SubTask;
@@ -11,13 +8,10 @@ import task.SubTask;
 import java.io.IOException;
 import java.util.List;
 
-public class SubTasksHandler extends BaseHttpHandler implements HttpHandler {
-    private final TaskManager taskManager;
-    private final Gson gson;
+public class SubTasksHandler extends BaseHttpHandler {
 
-    public SubTasksHandler(TaskManager taskManager) {
-        this.taskManager = taskManager;
-        gson = HttpTaskServer.getGson();
+    public SubTasksHandler(TaskManager manager) {
+        this.manager = manager;
     }
 
     @Override
@@ -26,13 +20,13 @@ public class SubTasksHandler extends BaseHttpHandler implements HttpHandler {
         switch (exchange.getRequestMethod()) {
             case "GET":
                 if (idFromRequest == -1) {
-                    final List<SubTask> subtasks = taskManager.getSubTasks();
+                    final List<SubTask> subtasks = manager.getSubTasks();
                     final String response = gson.toJson(subtasks);
-                    System.out.println("Получили список всех задач");
+                    System.out.println("Получили список всех подзадач");
                     sendText(exchange, response);
                     return;
                 }
-                final SubTask task = taskManager.getSubTask(idFromRequest);
+                final SubTask task = manager.getSubTask(idFromRequest);
                 if (task != null) {
                     final String response = gson.toJson(task);
                     System.out.println("Получили задачу по id: " + idFromRequest);
@@ -44,7 +38,7 @@ public class SubTasksHandler extends BaseHttpHandler implements HttpHandler {
                 break;
 
             case "DELETE":
-                taskManager.deleteSubTask(idFromRequest);
+                manager.deleteSubTask(idFromRequest);
                 System.out.println("Задача с id = " + idFromRequest + " удалена");
                 exchange.sendResponseHeaders(200, 0);
                 exchange.close();
@@ -55,13 +49,13 @@ public class SubTasksHandler extends BaseHttpHandler implements HttpHandler {
                 final SubTask taskFromRequest = gson.fromJson(request, SubTask.class);
                 final int id = taskFromRequest.getId();
                 if (id > 0) {
-                    taskManager.updateSubTask(taskFromRequest);
+                    manager.updateSubTask(taskFromRequest);
                     System.out.println("Обновили задачу id = " + id);
                     exchange.sendResponseHeaders(200, 0);
                     exchange.close();
                 } else {
                     try {
-                        int addedId = taskManager.addNewSubTask(taskFromRequest);
+                        int addedId = manager.addNewSubTask(taskFromRequest);
                         System.out.println("Создали задачу id = " + addedId);
                         final String response = gson.toJson(taskFromRequest);
                         sendText(exchange, response);

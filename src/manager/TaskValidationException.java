@@ -1,4 +1,4 @@
 package manager;
 
-public class TaskValidationException extends Throwable {
+public class TaskValidationException extends RuntimeException {
 }

@@ -19,6 +19,7 @@ public class EpicTask extends Task {
         status = TaskStatus.NEW;
         startTime = LocalDateTime.now();
         duration = Duration.ofMinutes(10);
+        endTime = startTime.plusMinutes(duration.toMinutes());
     }
 
     public EpicTask(String name, String description) {
@@ -26,6 +27,7 @@ public class EpicTask extends Task {
         status = TaskStatus.NEW;
         startTime = LocalDateTime.now();
         duration = Duration.ofMinutes(10);
+        endTime = startTime.plusMinutes(duration.toMinutes());
     }
 
     public void addSubtaskId(int id) {

@@ -1,9 +1,6 @@
 package handler;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import http.HttpTaskServer;
 import manager.TaskManager;
 import manager.TaskValidationException;
 import task.Task;
@@ -11,13 +8,10 @@ import task.Task;
 import java.io.IOException;
 import java.util.List;
 
-public class TasksHandler extends BaseHttpHandler implements HttpHandler {
-    private final TaskManager taskManager;
-    private final Gson gson;
+public class TasksHandler extends BaseHttpHandler {
 
-    public TasksHandler(TaskManager taskManager) {
-        this.taskManager = taskManager;
-        gson = HttpTaskServer.getGson();
+    public TasksHandler(TaskManager manager) {
+        this.manager = manager;
     }
 
     @Override
@@ -26,13 +20,13 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         switch (exchange.getRequestMethod()) {
             case "GET":
                 if (idFromRequest == -1) {
-                    final List<Task> tasks = taskManager.getTasks();
+                    final List<Task> tasks = manager.getTasks();
                     final String response = gson.toJson(tasks);
                     System.out.println("Получили список всех задач");
                     sendText(exchange, response);
                     return;
                 }
-                final Task task = taskManager.getTask(idFromRequest);
+                final Task task = manager.getTask(idFromRequest);
                 if (task != null) {
                     final String response = gson.toJson(task);
                     System.out.println("Получили задачу по id: " + idFromRequest);
@@ -44,7 +38,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
                 break;
 
             case "DELETE":
-                taskManager.deleteTask(idFromRequest);
+                manager.deleteTask(idFromRequest);
                 System.out.println("Задача с id = " + idFromRequest + " удалена");
                 exchange.sendResponseHeaders(200, 0);
                 exchange.close();
@@ -55,13 +49,13 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
                 final Task taskFromRequest = gson.fromJson(request, Task.class);
                 final int id = taskFromRequest.getId();
                 if (id > 0) {
-                    taskManager.updateTask(taskFromRequest);
+                    manager.updateTask(taskFromRequest);
                     System.out.println("Обновили задачу id = " + id);
                     exchange.sendResponseHeaders(200, 0);
                     exchange.close();
                 } else {
                     try {
-                        int addedId = taskManager.addNewTask(taskFromRequest);
+                        int addedId = manager.addNewTask(taskFromRequest);
                         System.out.println("Создали задачу id = " + addedId);
                         final String response = gson.toJson(taskFromRequest);
                         sendText(exchange, response);

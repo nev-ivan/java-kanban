@@ -1,9 +1,6 @@
 package handler;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import http.HttpTaskServer;
 import manager.TaskManager;
 import task.EpicTask;
 import task.SubTask;
@@ -11,13 +8,10 @@ import task.SubTask;
 import java.io.IOException;
 import java.util.List;
 
-public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
-    private final TaskManager taskManager;
-    private final Gson gson;
+public class EpicsHandler extends BaseHttpHandler {
 
-    public EpicsHandler(TaskManager taskManager) {
-        this.taskManager = taskManager;
-        gson = HttpTaskServer.getGson();
+    public EpicsHandler(TaskManager manager) {
+        this.manager = manager;
     }
 
     @Override
@@ -26,17 +20,17 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
         final Integer idFromRequest = getIdFromPath(exchange.getRequestURI().getPath());
         switch (exchange.getRequestMethod()) {
             case "GET":
-                final EpicTask epic = taskManager.getEpicTask(idFromRequest);
+                final EpicTask epic = manager.getEpicTask(idFromRequest);
                 if (splitPath.length == 4 && epic != null) {
                     final List<SubTask> subtasks = epic.getSubTasksIds().stream()
-                            .map(taskManager::getSubTask)
+                            .map(manager::getSubTask)
                             .toList();
                     String response = gson.toJson(subtasks);
                     System.out.println("Получили подзадачи эпика с id = " + idFromRequest);
                     sendText(exchange, response);
                     return;
                 } else if (idFromRequest == -1) {
-                    final List<EpicTask> epics = taskManager.getEpicTasks();
+                    final List<EpicTask> epics = manager.getEpicTasks();
                     final String response = gson.toJson(epics);
                     System.out.println("Получили список всех эпиков");
                     sendText(exchange, response);
@@ -52,7 +46,7 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                 break;
 
             case "DELETE":
-                taskManager.deleteEpic(idFromRequest);
+                manager.deleteEpic(idFromRequest);
                 System.out.println("Эпик с id = " + idFromRequest + " удалён");
                 exchange.sendResponseHeaders(200, 0);
                 exchange.close();
@@ -63,12 +57,12 @@ public class EpicsHandler extends BaseHttpHandler implements HttpHandler {
                 final EpicTask epicFromRequest = gson.fromJson(request, EpicTask.class);
                 final int id = epicFromRequest.getId();
                 if (id > 0) {
-                    taskManager.updateEpic(epicFromRequest);
+                    manager.updateEpic(epicFromRequest);
                     System.out.println("Обновили эпик id = " + id);
                     exchange.sendResponseHeaders(200, 0);
                     exchange.close();
                 } else {
-                    int addedId = taskManager.addNewEpic(epicFromRequest);
+                    int addedId = manager.addNewEpic(epicFromRequest);
                     System.out.println("Создали эпик id = " + addedId);
                     final String response = gson.toJson(epicFromRequest);
                     sendText(exchange, response);
